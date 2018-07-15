@@ -7,7 +7,7 @@ import random
 import logging
 import json
 import os
-logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - ' +\
+logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
 os.chdir('D:\\Czarified\\Documents\\Python Scripts')
@@ -43,29 +43,36 @@ class Food:
         
     def __repr__(self):
         ''''''
-        return '<FoodObj: %s>' % self.__dict__
+        return '<FoodObj: %s>' % self.name
     
 #
 
 
 ### Functions ###
 
-def randomFood(RecipeBook,meal)
+def randomFood(book,meal):
     '''
     Randomly selects a food from the Recipe Book.
     Dependencies: random, logging
     Input is desired recipe book, and meal type..
     Output is a food for the correct meal.
     '''
-    food = random.choice(RecipeBook)
+    food = random.choice(book)
     
-    if food.type != meal:
-        logging.debug('Repicking food for day ' + str(i) +      \
-                        ', meal ' + meal + '...')
-        food = randomFood(RecipeBook,meal)
+    try:
+        for i in range(0,len(book)):
+            if food.type != meal:
+                logging.debug('Repicking food for ', meal)
+                food = randomFood(book,meal)
+            else:
+                logging.debug('RandomFood picked a correct meal: ' + str(meal))
+                break
+    except IndexError:
+        logging.debug('RandomFood was given book with zero length')
     return food
 
-def pickFood(RecipeBook,meal,calMax,carbMax,leftovers=[])
+def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
+            leftovers=[]):
     '''
     Checks a food object with defined daily goals. Warns the user if
     calorie budget is broken, and tries to pick a food within carb budget.
@@ -73,16 +80,21 @@ def pickFood(RecipeBook,meal,calMax,carbMax,leftovers=[])
     Input is recipe book, meal type, daily limits, and
     available leftovers (optional).
     Output is a food that properly fits the meal plan, calorie count,
-    and carb count.
+    and carb count, as well as the remaining daily limits and
+    remaining leftovers.
     '''
     templeft = leftovers
     try:
-        food = random.choice(templeft)
+        food = randomFood(templeft,meal)
         templeft.remove(food)
-        logging.debug('Trying to use leftovers: ' + food.name)
+        # logging.debug('Trying to use leftovers: ' + food.name)
+    except IndexError:
+        logging.debug('PickFood: Try block failed. Leftovers blank?')
+        food = randomFood(RecipeBook,meal)
     except:
-        randomFood(RecipeBook,meal)
+        logging.debug('PickFood: Try block failed. No indexError! Check code!')
     
+    # Warn user is calorie budget broken.
     if (calCount+food.cal) < calMax:
         calCount = calCount + food.cal
         logging.debug('Day ' + str(i) + ' calCount: ' + str(calCount))
@@ -104,18 +116,18 @@ def pickFood(RecipeBook,meal,calMax,carbMax,leftovers=[])
                 break
             else:
                 try:
-                    food = random.choice(leftovers)
+                    food = randomFood(leftovers,meal)
                     logging.debug('Trying to use leftovers: ' + food.name)
                 except:
-                    food = pickFood(RecipeBook,meal,leftovers)
+                    food = randomFood(RecipeBook,meal)
     try:
         leftovers.remove(food)
         logging.debug('Removed ' + food.name + ' from leftovers.')
     except:
         logging.debug('No leftovers were used.')
     
-    logging.debug(' Complete. Food picked: ' + food.name)
-    return food, calCount, carbCount
+    logging.debug(' PickFood Completed!! Food picked: ' + food.name)
+    return food, calCount, carbCount, leftovers
 
 def getMacros(plan):
     '''
@@ -145,13 +157,16 @@ def readRecipes():
     '''
     Opens Recipe Book file and reads data into the working namespace.
     Dependencies: os, json, Food class.
+    Output is a recipe book object.
     '''
+    book = []
     bookFile = open('RecipeBook.dat')
     strList = bookFile.readlines()
     for i in range(len(strList)):
         xx = json.loads(strList[i])
-        RecipeBook.append(Food(dict=xx))
+        book.append(Food(dict=xx))
         logging.debug('Appended to RecipeBook')
+    return book
         
     
 def writeRecipes(food):
@@ -187,36 +202,11 @@ carbohydrates = 25 # The program will make sure daily totals stay under this
 
 logging.debug('Start of Program.')
 RecipeBook = []         # RecipeBook is the master list of foods
+RecipeBook = readRecipes()
 
 # Note: The program will probably work better if all recipes are 
 #       complete meals. For example, create a recipe for "Porkchops with
 #       green beans" instead of both a "Porkchops" and a "Green Beans."
-
-TestDinner1 = Food('TestDinner1','Dinner',0.5,500,10,5,2,10,30)
-TestDinner2 = Food('TestDinner2','Dinner',0.5,400,10,10,2,5,30)
-TestDinner3 = Food('TestDinner3','Dinner',0.5,300,10,10,10,7,30)
-# TestDinner has 3 ingredients. Ingredients will never be changed.
-TestDinner1.ingr = ( ('Ingrdnt1',10,'oz'),  # Ingredient 1 needs 10 ounces
-                     ('Ingrdnt2',12,'cp'),  # Ingredient 2 needs 12 cups
-                     ('Ingrdnt3', 5,''  )   # Ingredient 3 needs 5 each
-                   )
-
-## These properties were created on init, repeated here for clarity.                   
-# TestDinner1.type = 'Dinner'             # This food is a dinner.
-# TestDinner1.freq = 0.5                  # Higher = eat more           ### WIP ###
-# TestDinner1.cal = 500
-# TestDinner1.protein = 10                # This food has 10g of protein
-# TestDinner1.carb = 5                    # This food has 5g of carbs
-# TestDinner1.fiber = 2                   # This food has 2g of fiber
-# TestDinner1.netCarb = TestDinner1.carb = TestDinner1.fiber
-                                          # This food has 3g of net carbs.
-# TestDinner1.t = 30                      # This food takes 30 minutes to prep/cook
-
-
-# Create a new entry in the RecipeBook for testing
-RecipeBook.append(TestDinner1)
-RecipeBook.append(TestDinner2)
-RecipeBook.append(TestDinner3)
 
 
 # Schedule input is a list of days. Each day is a list of meals
@@ -251,9 +241,9 @@ mealPlan = []                               # Final plan will be a list of dicts
 # Example complete mealPlan, for 2 1-meal days:
 
 # Whats for dinner on the first day of the plan?
-# list( exmealPlan[0]['Dinner'].name)
+# exmealPlan[0]['Dinner']
 # Lunch?
-# list( exmealPlan[0]['Lunch'].name)
+# exmealPlan[0]['Lunch']
 
 #            exmealPlan = [
                # {'Dinner': [TestDinner1,TestSide1],
@@ -282,8 +272,9 @@ for day in inPlan:
         # TODO: Pull a weighted, random food that matches the meal type
         
         # Pick a random food.
-        food,calCount,carbCount = pickFood(RecipeBook,meal,calories,    \
-                                            carbohydrates,leftovers)
+        food,calCount,carbCount, leftovers =                            \
+            pickFood(RecipeBook,meal,calories,carbohydrates,calCount,   \
+                    carbCount,leftovers=leftovers)
         
         #TODO: Note the frequency of that food.
         
