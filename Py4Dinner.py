@@ -10,7 +10,7 @@ import os
 logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
-os.chdir('D:\\Czarified\\Documents\\Python Scripts')
+os.chdir('D:\\Czarified\\Documents\\GitHub\\py4Dinner')
 
 ### Classes   ###
 
@@ -21,7 +21,7 @@ class Food:
     provided on creation are numbers.
     '''
     def __init__(self,name=None,type=None,freq=0,cal=0,protein=0,carb=0,\
-                fiber=0,fat=0,t=0,dict=None):
+                fiber=0,fat=0,t=0,serv=1,dict=None):
         '''
         Creates all food attributes, or reads them from the supplied
         dictionary. Supply one or the other, not both!
@@ -37,6 +37,7 @@ class Food:
             self.netCarb = carb - fiber
             self.fat = fat
             self.t = t
+            self.serv = serv
         else:
             for key in dict:
                 setattr(self, key, dict[key])
@@ -196,6 +197,7 @@ def listFood(book):
 
 calories = 1456    # The program will make sure daily totals stay under this
 carbohydrates = 25 # The program will make sure daily totals stay under this
+people = 2         # How many people will be following the meal plan
 
 #
 
@@ -278,8 +280,16 @@ for day in inPlan:
         
         #TODO: Note the frequency of that food.
         
-        mealPlan[i][meal].append(food)
-    
+        # Adding correct number of meals
+        if food.serv >= people:
+            mealPlan[i][meal].append(food)
+            for k in range(food.serv - people):
+                leftovers.append(food)
+        elif food.serv < people:
+            x = round(people/food.serv)
+            mealPlan[i][meal].append(food)
+            for k in range(x*food.serv - people):
+                leftovers.append(food)
     # Check that all desired meals have been planned.
     for k in ['Breakfast','Lunch','Snacks','Dinner']:
         try:
