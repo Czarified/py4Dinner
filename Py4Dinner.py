@@ -7,7 +7,9 @@ import random
 import logging
 import json
 import os
-logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
+from recipe_scrapers import scrape_me
+import re
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
 os.chdir('D:\\Czarified\\Documents\\GitHub\\py4Dinner')
@@ -190,6 +192,73 @@ def listFood(book):
     if x.lower() == 'y':
         for i in book:
             print(i.name)
+            
+def newRecipe(url):
+    '''
+    Scrapes the given webpage of all required recipe data and returns a
+    new Food class with appropriate attributes.
+    Dependencies: recipe_scraper, re
+    '''
+    xx = scrape_me(url)
+    serv, cal, fat, carb, prot = xx.myInfo()
+    tmpType = input('What type of meal is this? ')
+    tmpFood = Food(xx.title(), tmpType.capitalize(), 0, cal, prot, carb,\
+                    0, fat, xx.total_time(), serv)
+    tmpFood.instr = xx.instructions()
+    tmpFood.ingr = []
+    scraps = xx.ingredients()
+    
+    
+    # Ingredients are returned from the scraper in a generalizes list
+    # of strings. In order to count up all required ingredients, this
+    # must be reconfigured to the proper Food class format. Changing the
+    # scraper method or output in the future would fix this.
+    
+    measurements = {'teaspoon':'tsp', 'tablespoon':'tbsp',
+                    'teaspoons':'tsp', 'tablespoons':'tbsp',
+                    'fluid oz':'fl oz', 'cup':'c', 'pint':'pt',
+                    'cups':'c', 'pints':'pts', 'quarts':'qts',
+                    'quart':'qt', 'gallon':'gal', 'milliliter':'ml',
+                    'gallons':'gal', 'liters':'L', 'pounds':'lbs',
+                    'millilitre':'ml', 'liter':'L', 'litre':'L',
+                    'pound':'lb', 'ounce':'oz', 'milligram':'mg',
+                    'ounces':'oz', 'inches':'in', 'grams':'g',
+                    'gram':'g', 'kilogram':'kg', 'millimeter':'mm',
+                    'centimeter':'cm', 'meter':'m', 'inch':'in'
+                    }
+    regNum = re.compile(r'''(
+        (\d+/?\d*)                       # The ingredient quantity, Grp1
+        \s?                              # Separator
+        (teaspoon|tablespoons|           # Measurements           , Grp2
+         fluid oz|cup|pint|quart|
+         gallon|milliliter|millilitre|
+         liter|litre|pound|ounce|
+         milligram|gram|kilogram|
+         millimeter|centimeter|meter|inch)?
+        \s?                         # Separator
+        (.*)                        # The actual ingredient , Grp3
+        )''', re.VERBOSE)
+    logging.debug('Ingredient list reformatting...')
+    for i in scraps:                    # Take the regex match object
+        mo = regNum.findall(i)          # and format it for the Food Class.
+        # logging.debug(mo)
+        tmpFood.ingr.append(list(mo[0][1:]))
+        
+    for i in tmpFood.ingr:
+        logging.debug('')
+        numstr = i[0]
+        if numstr.isnumeric():
+            i[0] = float(numstr)            # Convert the string numbers
+        else:
+            numl = numstr.split('/')
+            i[0] = float(numl[0])/float(numl[1])
+        full_mes = i[1]
+        try:
+            i[1] = measurements[full_mes]   # Shorten measurements
+        except KeyError:
+            continue
+        
+    return tmpFood
 #
 
 
