@@ -157,14 +157,14 @@ def getMacros(plan):
     
     return macros
 
-def readRecipes():
+def readRecipes(name):
     '''
     Opens Recipe Book file and reads data into the working namespace.
     Dependencies: os, json, Food class.
     Output is a recipe book object.
     '''
     book = []
-    bookFile = open('RecipeBook.dat')
+    bookFile = open(name + '.dat')
     strList = bookFile.readlines()
     for i in range(len(strList)):
         xx = json.loads(strList[i])
@@ -192,14 +192,17 @@ def listFood(book):
     x = input('[y/n] ')
     if x.lower() == 'y':
         for i in book:
-            print(i.name)
+            print(str(book.index(i)) + ': ' + i.name)
             
-def newRecipe(url=pyperclip.paste()):       # Needs to be decorated???
+def newRecipe(url=None):
     '''
     Scrapes the given webpage of all required recipe data and returns a
     new Food class with appropriate attributes.
-    Dependencies: recipe_scraper, re
+    Dependencies: recipe_scraper, re, pyperclip
     '''
+    if url is None:
+        url = pyperclip.paste()
+    
     xx = scrape_me(url)
     serv, cal, fat, carb, prot = xx.myInfo()
     tmpType = input('What type of meal is this? ')
@@ -263,6 +266,33 @@ def newRecipe(url=pyperclip.paste()):       # Needs to be decorated???
             continue
         
     return tmpFood
+
+def combine(Food1, Food2):
+    '''
+    Combines 2 foods into 1. Adds together any common ingredients, and
+    macronutrients.
+    Dependencies: None
+    Input is 2 Food class objects.
+    Output is a new Food class object.
+    '''
+    comboDict = { 'name':Food1.name + ' & ' + Food2.name,
+                  'type':Food1.type,
+                  'freq':0,
+                  'cal':Food1.cal + Food2.cal,
+                  'protein':Food1.protein + Food2.protein,
+                  'carb':Food1.carb + Food2.carb,
+                  'fiber':Food1.fiber + Food2.fiber,
+                  'netCarb':Food1.netCarb + Food2.netCarb,
+                  'fat':Food1.fat + Food2.fat,
+                  't':{Food1.name:Food1.t, Food2.name:Food2.t},
+                  'serv':Food1.serv
+                }
+    newFood = Food(dict=comboDict)
+    newFood.ingr = Food1.ingr
+    newFood.ingr.append(Food2.ingr)
+    newFood.instr = Food1.instr + '\n\n' + Food2.instr
+    return newFood
+
 #
 
 
@@ -277,7 +307,7 @@ people = 2         # How many people will be following the meal plan
 
 logging.debug('Start of Program.')
 RecipeBook = []         # RecipeBook is the master list of foods
-RecipeBook = readRecipes()
+RecipeBook = readRecipes('RecipeBook')
 
 # Note: The program will probably work better if all recipes are 
 #       complete meals. For example, create a recipe for "Porkchops with

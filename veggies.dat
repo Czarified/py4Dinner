@@ -1,0 +1,2 @@
+{"name": "Green Beans", "type": "Dinner", "freq": 0, "cal": 15, "protein": 1, "carb": 3, "fiber": 1, "netCarb": 2, "fat": 0, "t": 15, "serv": 3.5, "ingr": [[1.0, "", "can Green Beans"]], "instr":"Heat in pot over stove"}
+{"name": "Green Beans", "type": "Dinner", "freq": 0, "cal": 15, "protein": 1, "carb": 3, "fiber": 1, "netCarb": 2, "fat": 0, "t": 15, "serv": 7, "ingr": [[2.0, "", "can Green Beans"]], "instr":"Heat in pot over stove"}
