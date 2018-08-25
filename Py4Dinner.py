@@ -10,7 +10,7 @@ import os
 from recipe_scrapers import scrape_me
 import re
 import pyperclip
-logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
 os.chdir('D:\\Czarified\\Documents\\GitHub\\py4Dinner')
@@ -299,7 +299,7 @@ def combine(Food1, Food2):
 ### Global Variables ###
 
 calories = 1456    # The program will make sure daily totals stay under this
-carbohydrates = 25 # The program will make sure daily totals stay under this
+carbohydrates = 500# The program will make sure daily totals stay under this
 people = 2         # How many people will be following the meal plan
 
 #
@@ -321,8 +321,9 @@ RecipeBook = readRecipes('RecipeBook')
 # Note that the order of meals informs priority!
 # Meals given later in the row will be more limited in cal and carb.
 inPlan = [
-    ['Dinner','Dinner','Dinner'],
-    ['Dinner','Dinner'],
+    ['Dinner'],
+    ['Dinner'],
+    ['Dinner'],
     ['Dinner']
 ]
 
@@ -387,7 +388,9 @@ for day in inPlan:
         if food.serv >= people:
             mealPlan[i][meal].append(food)
             for k in range(food.serv - people):
-                leftovers.append(food)
+                myleft = food
+                myleft.serv = 1
+                leftovers.append(myleft)
         elif food.serv < people:
             x = round(people/food.serv)
             mealPlan[i][meal].append(food)
@@ -406,6 +409,9 @@ for day in inPlan:
 logging.info('        Plan-builder complete!')
 
 #TODO: Ask user if plan is acceptable, and allow manual override.
+print(mealPlan)
+print(leftovers)
+
 
 #-----------------------------------------------------------------------
 #TODO: Compile output dictionary
