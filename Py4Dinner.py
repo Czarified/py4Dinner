@@ -10,7 +10,8 @@ import os
 from recipe_scrapers import scrape_me
 import re
 import pyperclip
-logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - ' +\
+import pprint
+logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
 os.chdir('D:\\Czarified\\Documents\\GitHub\\py4Dinner')
@@ -58,21 +59,21 @@ def randomFood(book,meal):
     '''
     Randomly selects a food from the Recipe Book.
     Dependencies: random, logging
-    Input is desired recipe book, and meal type..
+    Input is desired recipe book, and meal type.
     Output is a food for the correct meal.
     '''
     food = random.choice(book)
     
     try:
         for i in range(0,len(book)):
-            if food.type != meal:
+            if meal not in food.type:
                 logging.debug('Repicking food for ', meal)
-                food = randomFood(book,meal)
+                food = random.choice(book)
             else:
                 logging.debug('RandomFood picked a correct meal: ' + str(meal))
                 break
     except IndexError:
-        logging.debug('RandomFood was given book with zero length')
+        logging.debug('RandomFood was given book with zero length!')
     return food
 
 def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
@@ -80,6 +81,8 @@ def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
     '''
     Checks a food object with defined daily goals. Warns the user if
     calorie budget is broken, and tries to pick a food within carb budget.
+    Makes sure that new food is not the same as prevfood (defined in the
+    main program).
     Dependencies: pickFood, random, logging
     Input is recipe book, meal type, daily limits, and
     available leftovers (optional).
@@ -98,10 +101,16 @@ def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
     except:
         logging.debug('PickFood: Try block failed. No indexError! Check code!')
     
+    if food is prevfood:
+        logging.info('PickFood: ' + food.name + ' is same as ' +       \
+                     prevfood.name)
+        logging.info('PickFood: Picking different option.')
+        food = randomFood(RecipeBook,meal)
+    
     # Warn user is calorie budget broken.
     if (calCount+food.cal) < calMax:
         calCount = calCount + food.cal
-        logging.debug('Day ' + str(i) + ' calCount: ' + str(calCount))
+        logging.info('Day ' + str(i) + ' calCount: ' + str(calCount))
     else:
         logging.warning('Day ' + str(i) + ' calories over limit! Total:'\
                         + str(calCount+food.cal))
@@ -124,6 +133,8 @@ def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
                     logging.debug('Trying to use leftovers: ' + food.name)
                 except:
                     food = randomFood(RecipeBook,meal)
+    
+    # Remove the food from leftovers, if that's where it came from.
     try:
         leftovers.remove(food)
         logging.debug('Removed ' + food.name + ' from leftovers.')
@@ -316,15 +327,17 @@ RecipeBook = readRecipes('RecipeBook')
 
 # Schedule input is a list of days. Each day is a list of meals
 # (Input will not be changed, but lists are more readable than tuples.)
-# This test input will plan 4 days, each containing various numbers of "dinners"
+# This test input will plan 4 days
 
 # Note that the order of meals informs priority!
 # Meals given later in the row will be more limited in cal and carb.
 inPlan = [
     ['Dinner'],
+    ['Dinner','Lunch'],
+    ['Dinner','Lunch'],
+    ['Dinner','Lunch'],
     ['Dinner'],
-    ['Dinner'],
-    ['Dinner']
+    ['Dinner','Lunch']
 ]
 
 # For example, to plan work lunches for a week:
@@ -363,6 +376,8 @@ mealPlan = []                               # Final plan will be a list of dicts
 logging.info('Start of plan-builder ...')
 i = 0
 leftovers = []
+f = 0
+prevfood = None
 # Since "day" is a row, "i" is a numerical counter of the list index for that day.
 
 for day in inPlan:
@@ -374,28 +389,34 @@ for day in inPlan:
             mealCheck = mealPlan[i][meal]
         except KeyError:
             mealPlan[i][meal] = []  # Add a list for that meal
-        
-        # TODO: Pull a weighted, random food that matches the meal type
-        
+              
         # Pick a random food.
         food,calCount,carbCount, leftovers =                            \
             pickFood(RecipeBook,meal,calories,carbohydrates,calCount,   \
                     carbCount,leftovers=leftovers)
         
         #TODO: Note the frequency of that food.
+        f = food.freq
+        prevfood = food
         
         # Adding correct number of meals
         if food.serv >= people:
             mealPlan[i][meal].append(food)
+            # Add leftovers to the leftovers list.
             for k in range(food.serv - people):
                 myleft = food
-                myleft.serv = 1
+                myleft.serv = 1         # Split into individual servings.
+                myleft.type + 'Lunch'   # Allow it to be used for lunch.
                 leftovers.append(myleft)
         elif food.serv < people:
             x = round(people/food.serv)
             mealPlan[i][meal].append(food)
             for k in range(x*food.serv - people):
-                leftovers.append(food)
+                myleft = food
+                myleft.serv = 1         # Split into individual servings.
+                myleft.type + 'Lunch'   # Allow it to be used for lunch.
+                leftovers.append(myleft)
+    
     # Check that all desired meals have been planned.
     for k in ['Breakfast','Lunch','Snacks','Dinner']:
         try:
@@ -409,8 +430,12 @@ for day in inPlan:
 logging.info('        Plan-builder complete!')
 
 #TODO: Ask user if plan is acceptable, and allow manual override.
-print(mealPlan)
-print(leftovers)
+print('Meal plan created:')
+pprint.pprint(mealPlan)
+
+print('')
+print('Leftovers:')
+pprint.pprint(leftovers)
 
 
 #-----------------------------------------------------------------------
