@@ -11,7 +11,8 @@ from recipe_scrapers import scrape_me
 import re
 import pyperclip
 import pprint
-logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
+from PIL import Image, ImageDraw, ImageFont
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
 os.chdir('D:\\Czarified\\Documents\\GitHub\\py4Dinner')
@@ -337,7 +338,6 @@ inPlan = [
     ['Dinner','Lunch'],
     ['Dinner','Lunch'],
     ['Dinner'],
-    ['Dinner','Lunch']
 ]
 
 # For example, to plan work lunches for a week:
@@ -430,7 +430,7 @@ for day in inPlan:
 logging.info('        Plan-builder complete!')
 
 #TODO: Ask user if plan is acceptable, and allow manual override.
-print('Meal plan created:')
+print('\n\nMeal plan created:')
 pprint.pprint(mealPlan)
 
 print('')
@@ -439,10 +439,50 @@ pprint.pprint(leftovers)
 
 
 #-----------------------------------------------------------------------
-#TODO: Compile output dictionary
-
 
 #TODO: Format output dictionary for grocery list and menu
+print('\n\n')
 
+groceries = {}
 
+# for v in mealPlan[0]['Dinner'][0].ingr:
+#   print(v)
+
+for day in mealPlan:
+    for k,v in day.items():
+        for eachfood in v:
+            for i in eachfood.ingr:
+                # print(i)
+                if i[2] in groceries.keys():
+                    # TODO: Add more of the ingr.
+                    groceries[i[2]][0] += i[0]
+                else:
+                    groceries[i[2]] = [i[0], i[1]]
+                    
+print('\n\nGrocery List:')
+pprint.pprint(groceries)
+            
 #TODO: Create grocery list and menu files
+print('\n\n')
+names = {}
+coords = [(70,280),(70,400),(70,525),(70,640),(70,765)]
+
+i = 0
+for day in mealPlan:
+    for k,v in day.items():
+        if k in 'Dinner':
+            logging.debug(k + ': ' + str(v))
+            names[coords[i]] = v[0].name
+            i += 1
+
+im = Image.open('images\BlankDinner.png')
+draw = ImageDraw.Draw(im)
+fontsFolder = 'C:\Windows\Fonts'        # Should probably include all fonts in the repo
+arial = ImageFont.truetype(os.path.join(fontsFolder, 'arial.ttf'), 26)
+            
+for k,v in names.items():
+    draw.text(k, v, fill='red', font=arial)
+    
+im.save('new.png')
+
+
