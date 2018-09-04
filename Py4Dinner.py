@@ -12,7 +12,7 @@ import re
 import pyperclip
 import pprint
 from PIL import Image, ImageDraw, ImageFont
-logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - ' +\
+logging.basicConfig(level=logging.INFO, format=' %(asctime)s - ' +\
                     '%(levelname)s - %(message)s')
 
 os.chdir('D:\\Czarified\\Documents\\GitHub\\py4Dinner')
@@ -75,6 +75,13 @@ def randomFood(book,meal):
                 break
     except IndexError:
         logging.debug('RandomFood was given book with zero length!')
+    
+    if food is prevfood:
+        logging.info('Prevfood: ' + food.name + ' is same as ' +       \
+                     prevfood.name)
+        logging.info('randomFood: Picking different option.')
+        food = randomFood(RecipeBook,meal)
+        
     return food
 
 def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
@@ -102,11 +109,6 @@ def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
     except:
         logging.debug('PickFood: Try block failed. No indexError! Check code!')
     
-    if food is prevfood:
-        logging.info('PickFood: ' + food.name + ' is same as ' +       \
-                     prevfood.name)
-        logging.info('PickFood: Picking different option.')
-        food = randomFood(RecipeBook,meal)
     
     # Warn user is calorie budget broken.
     if (calCount+food.cal) < calMax:
@@ -334,9 +336,9 @@ RecipeBook = readRecipes('RecipeBook')
 # Meals given later in the row will be more limited in cal and carb.
 inPlan = [
     ['Dinner'],
-    ['Dinner','Lunch'],
-    ['Dinner','Lunch'],
-    ['Dinner','Lunch'],
+    ['Dinner'],
+    ['Dinner'],
+    ['Dinner'],
     ['Dinner'],
 ]
 
@@ -463,9 +465,8 @@ print('\n\nGrocery List:')
 pprint.pprint(groceries)
             
 #TODO: Create grocery list and menu files
-print('\n\n')
 names = {}
-coords = [(70,280),(70,400),(70,525),(70,640),(70,765)]
+coords = [(70,280),(70,405),(70,523),(70,640),(70,763)]
 
 i = 0
 for day in mealPlan:
@@ -478,10 +479,10 @@ for day in mealPlan:
 im = Image.open('images\BlankDinner.png')
 draw = ImageDraw.Draw(im)
 fontsFolder = 'C:\Windows\Fonts'        # Should probably include all fonts in the repo
-arial = ImageFont.truetype(os.path.join(fontsFolder, 'arial.ttf'), 26)
+myfont = ImageFont.truetype(os.path.join(fontsFolder, 'consolab.ttf'), 26)
             
 for k,v in names.items():
-    draw.text(k, v, fill='red', font=arial)
+    draw.text(k, v, fill='white', font=myfont)
     
 im.save('new.png')
 
