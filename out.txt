@@ -1,0 +1,58 @@
+Meal plan created:
+
+[{'Breakfast': {},
+  'Dinner': [<FoodObj: Chicken Caesar Salad>],
+  'Lunch': {},
+  'Snacks': {}},
+ {'Breakfast': {},
+  'Dinner': [<FoodObj: Chicken Marsala>],
+  'Lunch': {},
+  'Snacks': {}},
+ {'Breakfast': {},
+  'Dinner': [<FoodObj: Chicken Caesar Salad>],
+  'Lunch': {},
+  'Snacks': {}},
+ {'Breakfast': {},
+  'Dinner': [<FoodObj: Chicken Marsala>],
+  'Lunch': {},
+  'Snacks': {}},
+ {'Breakfast': {},
+  'Dinner': [<FoodObj: Baked Teriyaki Chicken>],
+  'Lunch': {},
+  'Snacks': {}}]
+
+
+Leftovers:
+[<FoodObj: Baked Teriyaki Chicken>,
+ <FoodObj: Baked Teriyaki Chicken>,
+ <FoodObj: Baked Teriyaki Chicken>,
+ <FoodObj: Baked Teriyaki Chicken>]
+
+
+Grocery List:
+{'Marsala wine': [1.0, 'c'],
+ 'all-purpose flour': [2.0, 'c'],
+ 'boneless skinless chicken breast': [32.0, 'oz'],
+ 'butter, divided': [4.0, 'tbsp'],
+ 'chicken stock': [1.0, 'c'],
+ 'cider vinegar': [0.25, 'c'],
+ 'clove garlic, minced': [3.0, ''],
+ 'cold water': [1.0, 'tbsp'],
+ 'cornstarch': [1.0, 'tbsp'],
+ 'croutons': [2.0, 'c'],
+ 'dressing': [2.0, 'c'],
+ 'ground black pepper': [0.25, 'tsp'],
+ 'ground ginger': [0.5, 'tsp'],
+ 'head romaine lettuce': [2.0, ''],
+ 'olive oil': [2.0, 'tbsp'],
+ 'pinch dried oregano to taste': [2.0, ''],
+ 'shaved parmesan': [2.0, 'c'],
+ 'skinless chicken thighs': [12.0, ''],
+ 'skinless, boneless chicken cutlets, pounded to 1/4-inch thickness': [2.0,
+                                                                       'lb'],
+ 'sliced fresh mushrooms': [2.0, 'c'],
+ 'soy sauce': [0.5, 'c'],
+ 'spinach': [2.0, 'lb'],
+ 'uncooked white rice': [2.0, 'c'],
+ 'water': [4.0, 'c'],
+ 'white sugar': [0.5, 'c']}
