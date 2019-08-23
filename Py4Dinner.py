@@ -9,6 +9,8 @@ import logging
 import json
 import os
 from recipe_scrapers import scrape_me
+# Note: Install recipe_scrapers by running
+#       pip install https://github.com/hhursev/recipe-scrapers/zipball/master
 import re
 import pyperclip
 import pprint
@@ -86,6 +88,7 @@ def randomFood(book,meal):
         
     return food
 
+
 def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
             leftovers=[]):
     '''
@@ -112,7 +115,7 @@ def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
         logging.debug('PickFood: Try block failed. No indexError! Check code!')
     
     
-    # Warn user is calorie budget broken.
+    # Warn user if calorie budget broken.
     if (calCount+food.cal) < calMax:
         calCount = calCount + food.cal
         logging.info('Day ' + str(i) + ' calCount: ' + str(calCount))
@@ -149,6 +152,7 @@ def pickFood(RecipeBook,meal,calMax,carbMax,calCount,carbCount,        \
     logging.debug(' PickFood Completed!! Food picked: ' + food.name)
     return food, calCount, carbCount, leftovers
 
+
 def getMacros(plan):
     '''
     Determines daily composition of macronutrients.
@@ -172,6 +176,7 @@ def getMacros(plan):
         macros.append([fat_tot,prot_tot,carb_tot])
     
     return macros
+
 
 def readRecipes(name):
     '''
@@ -199,7 +204,8 @@ def writeRecipes(food,book='RecipeBook.dat'):
     foodstr = json.dumps(food.__dict__)
     w = bookFile.write(foodstr + '\n')
     bookFile.close()
-    
+ 
+ 
 def listFood(book):
     '''
     Prints the names of all recipes in the given recipe book variable.
@@ -210,6 +216,7 @@ def listFood(book):
     if x.lower() == 'y':
         for i in book:
             print(str(book.index(i)) + ': ' + i.name)
+
             
 def newRecipe(url=None):
     '''
@@ -283,6 +290,7 @@ def newRecipe(url=None):
             continue
         
     return tmpFood
+
 
 def combine(Food1, Food2):
     '''
